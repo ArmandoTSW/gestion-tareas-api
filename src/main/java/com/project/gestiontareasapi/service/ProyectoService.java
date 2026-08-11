@@ -1,13 +1,17 @@
 package com.project.gestiontareasapi.service;
 
+import com.project.gestiontareasapi.entity.Columna;
 import com.project.gestiontareasapi.entity.Proyecto;
 import com.project.gestiontareasapi.exception.RecursoNoEncontradoException;
 import com.project.gestiontareasapi.mapper.ProyectoMapper;
+import com.project.gestiontareasapi.model.ColumnaModel;
+import com.project.gestiontareasapi.model.ProyectoCompletoModel;
 import com.project.gestiontareasapi.model.ProyectoModel;
 import com.project.gestiontareasapi.repository.ProyectoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -51,5 +55,24 @@ public class ProyectoService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("Proyecto no encontrado"));
 
         proyectoRepository.delete(proyecto);
+    }
+
+    public ProyectoModel guardarConColumnas(ProyectoCompletoModel proyectoCompletoModel) {
+        Proyecto proyecto = new Proyecto();
+        proyecto.setNombre(proyectoCompletoModel.getNombre());
+        proyecto.setDescripcion(proyectoCompletoModel.getDescripcion());
+
+        List<Columna> columnas = new ArrayList<>();
+
+        for (ColumnaModel columnaModel : proyectoCompletoModel.getColumnas()) {
+            Columna columna = new Columna();
+            columna.setNombre(columnaModel.getNombre());
+            columna.setProyecto(proyecto);
+            columnas.add(columna);
+        }
+
+        proyecto.setColumnas(columnas);
+
+        return proyectoMapper.toModel(proyectoRepository.save(proyecto));
     }
 }
